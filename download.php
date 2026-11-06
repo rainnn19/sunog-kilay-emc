@@ -1,0 +1,7 @@
+<?php require_once __DIR__.'/includes/functions.php';logged();$type=$_GET['type']??'';$id=(int)($_GET['id']??0);$uid=$_SESSION['user_id'];$r=$_SESSION['role'];$file=null;
+if($type==='material'){
+ if($r==='student'){$s=$conn->prepare('SELECT m.* FROM materials m JOIN enrollments e ON e.course_id=m.course_id WHERE m.id=? AND e.student_id=?');$s->bind_param('ii',$id,$uid);}elseif($r==='teacher'){$s=$conn->prepare('SELECT * FROM materials WHERE id=? AND teacher_id=?');$s->bind_param('ii',$id,$uid);}else{$s=$conn->prepare('SELECT * FROM materials WHERE id=?');$s->bind_param('i',$id);}
+ $s->execute();$file=$s->get_result()->fetch_assoc();
+}elseif($type==='submission'&&in_array($r,['teacher','admin'],true)){
+ if($r==='teacher'){$s=$conn->prepare('SELECT s.* FROM submissions s JOIN assignments a ON a.id=s.assignment_id WHERE s.id=? AND a.teacher_id=?');$s->bind_param('ii',$id,$uid);}else{$s=$conn->prepare('SELECT * FROM submissions WHERE id=?');$s->bind_param('i',$id);}$s->execute();$file=$s->get_result()->fetch_assoc();}
+if(!$file||!$file['stored_name']){http_response_code(404);exit('File not found or access denied.');}$path=UPLOAD_DIR.'/'.$file['stored_name'];if(!is_file($path)){http_response_code(404);exit('File missing.');}header('Content-Type: application/octet-stream');header('Content-Disposition: attachment; filename="'.str_replace('"','',basename($file['original_name'])).'"');header('Content-Length: '.filesize($path));readfile($path);exit;
