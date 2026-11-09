@@ -116,10 +116,12 @@ include __DIR__.'/../includes/header.php';
                 <?php endif;?>
             <?php endforeach;?>
         </div>
-        <label>Time range 1</label>
+        <label id="time-range-one-label">Time range<?=count(array_filter($editing_days))>0?' on '.e(array_values(array_filter($editing_days))[0]):''?></label>
         <div><input type="time" name="time_start[]" value="<?=e($editing_ranges[0]['start']??'')?>" required> to <input type="time" name="time_end[]" value="<?=e($editing_ranges[0]['end']??'')?>" required></div>
-        <label>Time range 2 (optional)</label>
-        <div><input type="time" name="time_start[]" value="<?=e($editing_ranges[1]['start']??'')?>"> to <input type="time" name="time_end[]" value="<?=e($editing_ranges[1]['end']??'')?>"></div>
+        <div id="time-range-two"<?=count(array_filter($editing_days))<2?' hidden':''?>>
+            <label id="time-range-two-label">Time range<?=count(array_filter($editing_days))>1?' on '.e(array_values(array_filter($editing_days))[1]):''?> <span class="muted">(optional)</span></label>
+            <div><input type="time" name="time_start[]" value="<?=e($editing_ranges[1]['start']??'')?>"> to <input type="time" name="time_end[]" value="<?=e($editing_ranges[1]['end']??'')?>"></div>
+        </div>
         <label>Professor</label>
         <select name="professor_id" required>
             <option value="">Select professor</option>
@@ -156,6 +158,10 @@ document.querySelectorAll('#schedule-days .schedule-card').forEach(function(card
             input.value=selectedCard.getAttribute('data-day');
             selectedDays.appendChild(input);
         });
+        var selectedCards=document.querySelectorAll('#schedule-days .schedule-card.is-selected');
+        document.getElementById('time-range-one-label').textContent=selectedCards[0]?'Time range on '+selectedCards[0].getAttribute('data-day'):'Time range';
+        document.getElementById('time-range-two').hidden=selectedCards.length<2;
+        document.getElementById('time-range-two-label').firstChild.textContent=selectedCards[1]?'Time range on '+selectedCards[1].getAttribute('data-day')+' ':'Time range ';
     });
 });
 </script>

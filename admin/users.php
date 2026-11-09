@@ -34,7 +34,33 @@ if(!$err&&$_SERVER['REQUEST_METHOD']==='POST'){
             $err='Could not prepare the account query. Check the users table schema and reload this page.';
         }else{
             $s->bind_param('ssssssss',$n,$last_name,$first_name,$middle_name,$name_extension,$em,$hash,$ro);
-            $msg=$s->execute()?'Account created.':'Could not create account; email may already exist.';
+            $conn->begin_transaction();
+            if($s->execute()){
+                if($ro==='teacher'){
+                    $professor=$conn->prepare('INSERT INTO professors(name,last_name,first_name,middle_name,name_extension,email) VALUES(?,?,?,?,?,?)');
+                    if(!$professor){
+                        $conn->rollback();
+                        $err='Account was not created because the professor record could not be prepared.';
+                    }else{
+                        $professor->bind_param('ssssss',$n,$last_name,$first_name,$middle_name,$name_extension,$em);
+                        if(!$professor->execute()){
+                            $conn->rollback();
+                            $err='Account was not created because the professor record could not be saved.';
+                        }else{
+                            $conn->commit();
+                            $msg='Teacher account and professor record created.';
+                            $_POST=[];
+                        }
+                    }
+                }else{
+                    $conn->commit();
+                    $msg='Account created.';
+                    $_POST=[];
+                }
+            }else{
+                $conn->rollback();
+                $err='Could not create account; email may already exist.';
+            }
         }
     }
 }
@@ -74,7 +100,7 @@ include __DIR__.'/../includes/header.php';
         <label>Temporary password (8+ characters)</label>
         <input type="password" name="password" minlength="8" required>
         <label>Role</label>
-        <select name="role"><option>student</option><option>teacher</option><option>admin</option></select>
+        <select name="role"><option value="student">Student</option><option value="teacher">Professor</option><option value="admin">Admin</option></select>
         <button class="btn">Create account</button>
     </form>
 </div>

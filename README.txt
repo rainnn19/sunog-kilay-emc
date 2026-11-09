@@ -7,7 +7,7 @@ SUNOG KILAY EMC LMS - SETUP
 Initial admin: admin@sunogkilay.local / password
 Change the default admin password immediately. For a real deployment use HTTPS and review server security.
 Administrators can add and edit courses from Dashboard > Manage Courses; each course must be assigned to an active teacher.
-Administrators can add professor details from Dashboard > Add Professor using last name, first name, middle name, optional extension, and email. Professors do not need login accounts; they can be selected when adding or editing a course.
+Administrators can view professors and their assigned subjects from Dashboard > Professors. Professors do not need login accounts; they are assigned when adding or editing a course.
 Administrators can create user accounts using the same last name, first name, middle name, and optional name extension format. Existing accounts continue to use their existing full name until updated.
 The database.sql file can be imported for a fresh setup or run against an existing database; it includes the course-field upgrade and preserves existing course data.
 If the existing database does not have the professors table, run this once in phpMyAdmin:
