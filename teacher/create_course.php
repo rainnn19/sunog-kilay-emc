@@ -50,7 +50,15 @@ include __DIR__.'/../includes/header.php';
         <label>Class days <span class="muted">(choose up to 2)</span></label>
         <div class="schedule-cards">
             <?php foreach($days as $day):?>
-                <label class="schedule-card"><input type="checkbox" name="schedule_days[]" value="<?=$day?>" <?=in_array($day,(array)($_POST['schedule_days']??[]),true)?'checked':''?>><span><?=e(substr($day,0,3))?></span><strong><?=e($day)?></strong></label>
+                <?php $day_selected=in_array($day,(array)($_POST['schedule_days']??[]),true);?>
+                <button type="button" class="schedule-card<?=$day_selected?' is-selected':''?>" data-day="<?=e($day)?>" aria-pressed="<?=$day_selected?'true':'false'?>">
+                    <strong><?=e($day)?></strong>
+                </button>
+            <?php endforeach;?>
+        </div>
+        <div id="selected-days">
+            <?php foreach(array_values(array_intersect($days,(array)($_POST['schedule_days']??[]))) as $day):?>
+                <input type="hidden" name="schedule_days[]" value="<?=e($day)?>">
             <?php endforeach;?>
         </div>
         <label>Time range 1</label>
@@ -61,10 +69,21 @@ include __DIR__.'/../includes/header.php';
     </form>
 </div>
 <script>
-document.querySelectorAll('.schedule-card input').forEach(function(box){
-    box.addEventListener('change',function(){
-        var selected=document.querySelectorAll('.schedule-card input:checked');
-        if(selected.length>2){box.checked=false;alert('Select one or two days only.');}
+document.querySelectorAll('.schedule-card').forEach(function(card){
+    card.addEventListener('click',function(){
+        var selected=document.querySelectorAll('.schedule-card.is-selected');
+        if(!card.classList.contains('is-selected')&&selected.length>=2){alert('Select one or two days only.');return;}
+        card.classList.toggle('is-selected');
+        card.setAttribute('aria-pressed',card.classList.contains('is-selected')?'true':'false');
+        var selectedDays=document.getElementById('selected-days');
+        selectedDays.innerHTML='';
+        document.querySelectorAll('.schedule-card.is-selected').forEach(function(selectedCard){
+            var input=document.createElement('input');
+            input.type='hidden';
+            input.name='schedule_days[]';
+            input.value=selectedCard.getAttribute('data-day');
+            selectedDays.appendChild(input);
+        });
     });
 });
 </script>
